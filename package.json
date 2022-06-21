@@ -1,0 +1,41 @@
+{
+    "name": "pullrequests-cleanup",
+    "version": "0.0.6",
+    "description": "Record Metrics about a GitHub Actions run with the prometheus Pushgateway",
+    "main": "out/index.js",
+    "scripts": {
+        "build": "npx ncc build src/index.ts -m -o out/main/",
+        "watch": "npx ncc build src/index.ts -m -w -o out/main/",
+        "test": "npx ts-mocha -p tsconfig.json src/**/*.spec.ts"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/brose-ebike/pullrequests-cleanup"
+    },
+    "keywords": [],
+    "author": "Brose Fahrzeugteile SE & Co. KG, Bamberg",
+    "license": "Apache 2.0",
+    "bugs": {
+        "url": "https://github.com/brose-ebike/pullrequests-cleanup/issues"
+    },
+    "homepage": "https://github.com/brose-ebike/pullrequests-cleanup#readme",
+    "dependencies": {
+        "@actions/core": "^1.6.0",
+        "@actions/exec": "^1.1.0",
+        "@actions/github": "^5.0.0",
+        "node-fetch": "^3.2.1",
+        "uuid": "^8.3.2"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.3.0",
+        "@types/expect": "^24.3.0",
+        "@types/mocha": "^9.1.0",
+        "@types/node": "^15.3.0",
+        "@types/uuid": "^8.3.4",
+        "@vercel/ncc": "^0.33.3",
+        "chai": "^4.3.6",
+        "mocha": "^9.2.1",
+        "ts-mocha": "^9.0.2",
+        "typescript": "^4.2.4"
+    }
+}

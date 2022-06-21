@@ -1,0 +1,21 @@
+name: 'PullRequest Cleanup'
+description: 'Close existing PullRequest by Pattern'
+branding:
+  icon: 'file-text'  
+  color: 'red'
+inputs:
+  token:
+    required: true
+    description: "The repo PAT or GITHUB_TOKEN"
+  pattern:
+    required: true
+    description: "The Name Pattern for PullRequests to be deleted"
+  excludes:
+    required: true
+    description: "The PullRequests by Id which should be excludes. Multiple values have to be comma sepa‚rated"
+  comment:
+    required: false
+    description: "The comment which will be used for closing the PullRequests"
+runs:
+  using: 'node16'
+  main: 'out/main/index.js'
