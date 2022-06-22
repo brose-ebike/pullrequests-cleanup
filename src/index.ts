@@ -38,7 +38,7 @@ async function findPullRequests(octokit: InstanceType<typeof GitHub>, repo: {own
 
 function closePullRequest(octokit: InstanceType<typeof GitHub>, id: string, comment: string){
     const mutationId = uuidv4()
-    octokit.graphql(`mutation {
+    const response = octokit.graphql(`mutation {
         addComment(input: {subjectId:"${id}", body:"${comment}", clientMutationId:"${mutationId}"}) {
           clientMutationId
         }, 
@@ -46,6 +46,7 @@ function closePullRequest(octokit: InstanceType<typeof GitHub>, id: string, comm
           clientMutationId
         }
       }`)
+    core.debug(`GraphQL Response: ${JSON.stringify(response)}`)
 }
 
 async function main() {
@@ -60,6 +61,7 @@ async function main() {
     const octokit = github.getOctokit(token)
     // Close PRs
     const response = await findPullRequests(octokit, github.context.repo)
+    core.debug(`GraphQL Response: ${JSON.stringify(response)}`)
     const prs = response.data.repository.edges
         .filter((pr) => cPattern.test(pr.node.title))
         .filter((pr) => !cExcludes.includes(pr.node.number.toString()))
