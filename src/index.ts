@@ -5,23 +5,23 @@ import { GitHub } from '@actions/github/lib/utils';
 import { v4 as uuidv4 } from 'uuid';
 
 interface PullRequestResponse {
-    data: {
-        repository: {
-            edges: Array<
-                {
-                    node: {
-                        id: string,
-                        number: number,
-                        title: string
-                    }
-                }
-            >
+  repository: {
+    pullRequests: {
+      edges: Array<
+        {
+          node: {
+            id: string,
+            number: number,
+            title: string
+          }
         }
+      >
     }
+  }
 }
 
-async function findPullRequests(octokit: InstanceType<typeof GitHub>, repo: {owner: string, repo: string}): Promise<PullRequestResponse> {
-    return await octokit.graphql<PullRequestResponse>(`query {
+async function findPullRequests(octokit: InstanceType<typeof GitHub>, repo: { owner: string, repo: string }): Promise<PullRequestResponse> {
+  return await octokit.graphql<PullRequestResponse>(`query {
         repository(owner:"${repo.owner}", name:"${repo.repo}") {
           pullRequests(first:100, states: [OPEN]) {
             edges {
@@ -36,9 +36,9 @@ async function findPullRequests(octokit: InstanceType<typeof GitHub>, repo: {own
       }`);
 }
 
-function closePullRequest(octokit: InstanceType<typeof GitHub>, id: string, comment: string){
-    const mutationId = uuidv4()
-    const response = octokit.graphql(`mutation {
+function closePullRequest(octokit: InstanceType<typeof GitHub>, id: string, comment: string) {
+  const mutationId = uuidv4()
+  const response = octokit.graphql(`mutation {
         addComment(input: {subjectId:"${id}", body:"${comment}", clientMutationId:"${mutationId}"}) {
           clientMutationId
         }, 
@@ -46,36 +46,36 @@ function closePullRequest(octokit: InstanceType<typeof GitHub>, id: string, comm
           clientMutationId
         }
       }`)
-    core.debug(`GraphQL Response: ${JSON.stringify(response)}`)
+  core.debug(`GraphQL Response: ${JSON.stringify(response)}`)
 }
 
 async function main() {
-    // Input
-    const token = core.getInput('token');
-    const pattern = core.getInput('pattern');
-    const excludes = core.getInput('excludes');
-    const comment = core.getInput('comment');
-    core.debug(`Input Token: ${token}`);
-    core.debug(`Input Pattern: ${pattern}`);
-    core.debug(`Input Excludes: ${excludes}`);
-    core.debug(`Input Comment: ${comment}`);
-    // Prepare Input
-    const cPattern = new RegExp(pattern);
-    const cExcludes = excludes.split(",").filter(it => it !== "");
-    const octokit = github.getOctokit(token)
-    core.debug(`Compiled Pattern`);
-    // Close PRs
-    const response = await findPullRequests(octokit, github.context.repo);
-    core.debug(`GraphQL Response: ${JSON.stringify(response)}`);
-    const prs = response.data.repository.edges
-        .filter((pr) => cPattern.test(pr.node.title))
-        .filter((pr) => !cExcludes.includes(pr.node.number.toString()))
-        .map((pr) => {
-            closePullRequest(octokit, pr.node.id, comment)
-        });
-    const result = await Promise.all(prs)
-    // TODO handle result
+  // Input
+  const token = core.getInput('token');
+  const pattern = core.getInput('pattern');
+  const excludes = core.getInput('excludes');
+  const comment = core.getInput('comment');
+  core.debug(`Input Token: ${token}`);
+  core.debug(`Input Pattern: ${pattern}`);
+  core.debug(`Input Excludes: ${excludes}`);
+  core.debug(`Input Comment: ${comment}`);
+  // Prepare Input
+  const cPattern = new RegExp(pattern);
+  const cExcludes = excludes.split(",").filter(it => it !== "");
+  const octokit = github.getOctokit(token)
+  core.debug(`Compiled Pattern`);
+  // Close PRs
+  const response = await findPullRequests(octokit, github.context.repo);
+  core.debug(`GraphQL Response: ${JSON.stringify(response)}`);
+  const prs = response.repository.pullRequests.edges
+    .filter((pr) => cPattern.test(pr.node.title))
+    .filter((pr) => !cExcludes.includes(pr.node.number.toString()))
+    .map((pr) => {
+      closePullRequest(octokit, pr.node.id, comment)
+    });
+  const result = await Promise.all(prs)
+  // TODO handle result
 }
 main().catch((error) => {
-    core.setFailed(error.message);
+  core.setFailed(error.message);
 })
