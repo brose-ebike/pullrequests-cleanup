@@ -55,13 +55,18 @@ async function main() {
     const pattern = core.getInput('pattern');
     const excludes = core.getInput('excludes');
     const comment = core.getInput('comment');
+    core.debug(`Input Token: ${token}`);
+    core.debug(`Input Pattern: ${pattern}`);
+    core.debug(`Input Excludes: ${excludes}`);
+    core.debug(`Input Comment: ${comment}`);
     // Prepare Input
     const cPattern = new RegExp(pattern);
     const cExcludes = excludes.split(",").filter(it => it !== "");
     const octokit = github.getOctokit(token)
+    core.debug(`Compiled Pattern`);
     // Close PRs
-    const response = await findPullRequests(octokit, github.context.repo)
-    core.debug(`GraphQL Response: ${JSON.stringify(response)}`)
+    const response = await findPullRequests(octokit, github.context.repo);
+    core.debug(`GraphQL Response: ${JSON.stringify(response)}`);
     const prs = response.data.repository.edges
         .filter((pr) => cPattern.test(pr.node.title))
         .filter((pr) => !cExcludes.includes(pr.node.number.toString()))
