@@ -17,5 +17,5 @@ inputs:
     required: false
     description: "The comment which will be used for closing the PullRequests"
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'out/main/index.js'
